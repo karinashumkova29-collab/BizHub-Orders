@@ -1,0 +1,43 @@
+{
+  "name": "Customer",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Customer or business name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Contact email"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Contact phone number"
+    },
+    "company": {
+      "type": "string",
+      "description": "Company name if applicable"
+    },
+    "address": {
+      "type": "string",
+      "description": "Shipping/billing address"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the customer"
+    }
+  },
+  "required": [
+    "name",
+    "email"
+  ]
+}

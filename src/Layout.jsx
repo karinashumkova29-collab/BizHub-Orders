@@ -60,7 +60,7 @@ export default function Layout({ children, currentPageName }) {
             <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center">
               <Package className="w-4 h-4 text-white" />
             </div>
-            <span className="text-lg font-bold text-slate-900">OrderFlow</span>
+            <span className="text-lg font-bold text-slate-900">BizHub Orders</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

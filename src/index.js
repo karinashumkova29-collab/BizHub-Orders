@@ -1,80 +1,129 @@
 import express from "express";
 import cors from "cors";
-import { v4 as uuid } from "uuid";
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-let customers = [];
-let orders = []; // ADD THIS
+// Initialize Supabase
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
 
 // ============ CUSTOMERS ============
-// GET all - sorted by newest first
-app.get("/api/customers", (req, res) => {
-  const sortedCustomers = [...customers].sort((a, b) => 
-    new Date(b.created_date) - new Date(a.created_date)
-  );
-  res.json(sortedCustomers);
+app.get("/api/customers", async (req, res) => {
+  const { data, error } = await supabase
+    .from("customers")
+    .select("*")
+    .order("created_date", { ascending: false });
+  
+  if (error) return res.status(500).json({ message: error.message });
+  res.json(data);
 });
 
-app.get("/api/customers/:id", (req, res) => {
-  const customer = customers.find(c => c.id === req.params.id);
-  res.json(customer);
+app.get("/api/customers/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("customers")
+    .select("*")
+    .eq("id", req.params.id)
+    .single();
+  
+  if (error) return res.status(500).json({ message: error.message });
+  res.json(data);
 });
 
-app.post("/api/customers", (req, res) => {
-  const newCustomer = { id: uuid(), created_date: new Date().toISOString(), ...req.body };
-  customers.push(newCustomer);
-  res.json(newCustomer);
+app.post("/api/customers", async (req, res) => {
+  const { data, error } = await supabase
+    .from("customers")
+    .insert([req.body])
+    .select()
+    .single();
+  
+  if (error) return res.status(400).json({ message: error.message });
+  res.json(data);
 });
 
-app.put("/api/customers/:id", (req, res) => {
-  customers = customers.map(c =>
-    c.id === req.params.id ? { ...c, ...req.body } : c
-  );
-  res.json({ success: true });
+app.put("/api/customers/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("customers")
+    .update(req.body)
+    .eq("id", req.params.id)
+    .select()
+    .single();
+  
+  if (error) return res.status(400).json({ message: error.message });
+  res.json(data);
 });
 
-app.delete("/api/customers/:id", (req, res) => {
-  customers = customers.filter(c => c.id !== req.params.id);
+app.delete("/api/customers/:id", async (req, res) => {
+  const { error } = await supabase
+    .from("customers")
+    .delete()
+    .eq("id", req.params.id);
+  
+  if (error) return res.status(400).json({ message: error.message });
   res.json({ success: true });
 });
 
 // ============ ORDERS ============
-// GET all orders
-app.get("/api/orders", (req, res) => {
-  const sortedOrders = [...orders].sort((a, b) => 
-    new Date(b.created_date) - new Date(a.created_date)
-  );
-  res.json(sortedOrders);
+app.get("/api/orders", async (req, res) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .order("created_date", { ascending: false });
+  
+  if (error) return res.status(500).json({ message: error.message });
+  res.json(data);
 });
 
-app.get("/api/orders/:id", (req, res) => {
-  const order = orders.find(o => o.id === req.params.id);
-  res.json(order);
+app.get("/api/orders/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", req.params.id)
+    .single();
+  
+  if (error) return res.status(500).json({ message: error.message });
+  res.json(data);
 });
 
-app.post("/api/orders", (req, res) => {
-  const newOrder = { 
-    id: uuid(), 
-    created_date: new Date().toISOString(),
-    ...req.body 
-  };
-  orders.push(newOrder);
-  res.json(newOrder);
+app.post("/api/orders", async (req, res) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .insert([req.body])
+    .select()
+    .single();
+  
+  if (error) return res.status(400).json({ message: error.message });
+  res.json(data);
 });
 
-app.put("/api/orders/:id", (req, res) => {
-  orders = orders.map(o =>
-    o.id === req.params.id ? { ...o, ...req.body } : o
-  );
+app.put("/api/orders/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("orders")
+    .update(req.body)
+    .eq("id", req.params.id)
+    .select()
+    .single();
+  
+  if (error) return res.status(400).json({ message: error.message });
+  res.json(data);
+});
+
+app.delete("/api/orders/:id", async (req, res) => {
+  const { error } = await supabase
+    .from("orders")
+    .delete()
+    .eq("id", req.params.id);
+  
+  if (error) return res.status(400).json({ message: error.message });
   res.json({ success: true });
 });
 
-app.delete("/api/orders/:id", (req, res) => {
-  orders = orders.filter(o => o.id !== req.params.id);
-  res.json({ success: true });
-});
-
-app.listen(5000, () => console.log("✅ Server running on port 5000"));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

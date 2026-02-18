@@ -12,6 +12,16 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
+// Test endpoint to check environment variables
+app.get("/api/test", (req, res) => {
+  res.json({
+    hasSupabaseUrl: !!process.env.SUPABASE_URL,
+    hasSupabaseKey: !!process.env.SUPABASE_KEY,
+    supabaseUrlLength: process.env.SUPABASE_URL?.length || 0,
+    supabaseKeyLength: process.env.SUPABASE_KEY?.length || 0,
+  });
+});
+
 // ============ CUSTOMERS ============
 app.get("/api/customers", async (req, res) => {
   const { data, error } = await supabase

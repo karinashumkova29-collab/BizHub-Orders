@@ -58,11 +58,12 @@ const handleSubmit = async (e) => {
   
   const orderNumber = `ORD-${Date.now()}`;
   const orderData = {
-    ...formData,
-    order_number: orderNumber,
-    subtotal,
-    total_amount: total,
-  };
+  ...formData,
+  order_number: orderNumber,
+  subtotal,
+  total_amount: total,
+  items: formData.items || [],
+};
 
   console.log('=== ORDER CREATION DEBUG ===');
   console.log('1. Form Data:', formData);

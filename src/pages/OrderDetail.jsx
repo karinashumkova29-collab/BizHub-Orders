@@ -108,13 +108,14 @@ useEffect(() => {
   const subtotal = currentData.items?.reduce((sum, item) => sum + (item.total || 0), 0) || 0;
   const total = subtotal + (currentData.tax || 0) + (currentData.shipping_cost || 0);
 
-  const handleSave = () => {
-    updateMutation.mutate({
-      ...formData,
-      subtotal,
-      total_amount: total,
-    });
-  };
+ const handleSave = () => {
+  updateMutation.mutate({
+    ...formData,
+    items: formData?.items || order.items || [],
+    subtotal,
+    total_amount: total,
+  });
+};
 
   const startEditing = () => {
     setFormData(order);

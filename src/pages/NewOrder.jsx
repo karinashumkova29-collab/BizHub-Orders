@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { motion } from "framer-motion";
 import { ArrowLeft, Package, Loader2 } from "lucide-react";
@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Link } from "react-router-dom";
 import CustomerSelect from "@/components/orders/CustomerSelect";
 import OrderItemsEditor from "@/components/orders/OrderItemsEditor";
 
@@ -48,53 +47,42 @@ export default function NewOrder() {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       navigate(createPageUrl("Orders"));
     },
+    onError: (error) => {
+      console.error("Error creating order:", error);
+      alert(`Error creating order: ${error.message}`);
+    },
   });
 
   const subtotal = formData.items.reduce((sum, item) => sum + item.total, 0);
   const total = subtotal + (formData.tax || 0) + (formData.shipping_cost || 0);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  const orderNumber = `ORD-${Date.now()}`;
-  const orderData = {
-  ...formData,
-  order_number: orderNumber,
-  subtotal,
-  total_amount: total,
-  items: formData.items || [],
-};
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  console.log('=== ORDER CREATION DEBUG ===');
-  console.log('1. Form Data:', formData);
-  console.log('2. Order Number:', orderNumber);
-  console.log('3. Subtotal:', subtotal);
-  console.log('4. Total:', total);
-  console.log('5. Final Order Data:', orderData);
-  
-  try {
-    console.log('6. Attempting to create order...');
-    const result = await api.entities.Order.create(orderData);
-    console.log('7. SUCCESS! Order created:', result);
-    
-    // Invalidate queries and navigate
-    queryClient.invalidateQueries({ queryKey: ["orders"] });
-    navigate(createPageUrl("Orders"));
-  } catch (error) {
-    console.error('8. ERROR creating order:', error);
-    console.error('Error details:', error.response?.data || error.message);
-    alert(`Error creating order: ${error.message}`);
-  }
-};
+    const orderNumber = `ORD-${Date.now()}`;
+
+    const orderData = {
+      ...formData,
+      order_number: orderNumber,
+      subtotal,
+      total_amount: total,
+      items: formData.items || [],
+    };
+
+    createMutation.mutate(orderData);
+  };
 
   const handleCustomerChange = (customerId, customerName) => {
-    const customer = customers.find(c => c.id === customerId);
+    const customer = customers.find((c) => c.id === customerId);
     setFormData({
       ...formData,
       customer_id: customerId,
       customer_name: customerName,
-      shipping_address: customer ? 
-        [customer.address, customer.city, customer.state, customer.zip_code].filter(Boolean).join(", ") : ""
+      shipping_address: customer
+        ? [customer.address, customer.city, customer.state, customer.zip_code]
+            .filter(Boolean)
+            .join(", ")
+        : "",
     });
   };
 
@@ -133,7 +121,10 @@ const handleSubmit = async (e) => {
               {customers.length === 0 && (
                 <p className="text-sm text-slate-500 mt-3">
                   No customers yet.{" "}
-                  <Link to={createPageUrl("NewCustomer")} className="text-slate-900 underline">
+                  <Link
+                    to={createPageUrl("NewCustomer")}
+                    className="text-slate-900 underline"
+                  >
                     Add a customer
                   </Link>{" "}
                   first.
@@ -149,7 +140,9 @@ const handleSubmit = async (e) => {
                   <Label>Status</Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) => setFormData({ ...formData, status: value })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, status: value })
+                    }
                   >
                     <SelectTrigger className="h-11 rounded-xl border-slate-200">
                       <SelectValue />
@@ -163,11 +156,14 @@ const handleSubmit = async (e) => {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="space-y-2">
                   <Label>Priority</Label>
                   <Select
                     value={formData.priority}
-                    onValueChange={(value) => setFormData({ ...formData, priority: value })}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, priority: value })
+                    }
                   >
                     <SelectTrigger className="h-11 rounded-xl border-slate-200">
                       <SelectValue />
@@ -180,21 +176,27 @@ const handleSubmit = async (e) => {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div className="space-y-2 sm:col-span-2">
                   <Label>Shipping Address</Label>
                   <Input
                     value={formData.shipping_address}
-                    onChange={(e) => setFormData({ ...formData, shipping_address: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, shipping_address: e.target.value })
+                    }
                     className="h-11 rounded-xl border-slate-200"
                     placeholder="Enter shipping address"
                   />
                 </div>
+
                 <div className="space-y-2">
                   <Label>Due Date (Optional)</Label>
                   <Input
                     type="date"
                     value={formData.due_date}
-                    onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, due_date: e.target.value })
+                    }
                     className="h-11 rounded-xl border-slate-200"
                   />
                 </div>
@@ -222,10 +224,13 @@ const handleSubmit = async (e) => {
                       min="0"
                       step="0.01"
                       value={formData.tax}
-                      onChange={(e) => setFormData({ ...formData, tax: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tax: parseFloat(e.target.value) || 0 })
+                      }
                       className="h-11 rounded-xl border-slate-200"
                     />
                   </div>
+
                   <div className="space-y-2">
                     <Label>Shipping Cost</Label>
                     <Input
@@ -233,11 +238,17 @@ const handleSubmit = async (e) => {
                       min="0"
                       step="0.01"
                       value={formData.shipping_cost}
-                      onChange={(e) => setFormData({ ...formData, shipping_cost: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          shipping_cost: parseFloat(e.target.value) || 0,
+                        })
+                      }
                       className="h-11 rounded-xl border-slate-200"
                     />
                   </div>
                 </div>
+
                 <div className="border-t border-slate-100 pt-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Subtotal</span>
@@ -264,37 +275,39 @@ const handleSubmit = async (e) => {
               <h2 className="text-lg font-semibold text-slate-900 mb-4">Notes</h2>
               <Textarea
                 value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
                 placeholder="Add any additional notes..."
                 className="min-h-24 rounded-xl border-slate-200"
               />
             </div>
 
-           {/* Actions */}
-<div className="flex gap-3 justify-end pt-4">
-  <Link to={createPageUrl("Orders")}>
-    <Button type="button" variant="outline" className="h-11 px-6 rounded-xl">
-      Cancel
-    </Button>
-  </Link>
-  <Button
-    type="submit"
-    disabled={!formData.customer_id || createMutation.isPending}
-    className="bg-slate-900 hover:bg-slate-800 text-white h-11 px-8 rounded-xl shadow-sm flex items-center justify-center"
-  >
-    {createMutation.isPending ? (
-      <>
-        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-        Creating...
-      </>
-    ) : (
-      <>
-        <Package className="w-4 h-4 mr-2" />
-        Create Order
-      </>
-    )}
-  </Button>
-</div>
+            {/* Actions */}
+            <div className="flex gap-3 justify-end pt-4">
+              <Link to={createPageUrl("Orders")}>
+                <Button type="button" variant="outline" className="h-11 px-6 rounded-xl">
+                  Cancel
+                </Button>
+              </Link>
+              <Button
+                type="submit"
+                disabled={!formData.customer_id || createMutation.isPending}
+                className="bg-slate-900 hover:bg-slate-800 text-white h-11 px-8 rounded-xl shadow-sm flex items-center justify-center"
+              >
+                {createMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Package className="w-4 h-4 mr-2" />
+                    Create Order
+                  </>
+                )}
+              </Button>
+            </div>
           </motion.div>
         </form>
       </div>

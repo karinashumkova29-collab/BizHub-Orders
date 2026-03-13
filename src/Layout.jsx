@@ -1,9 +1,10 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
-import { LayoutDashboard, Package, Users, Menu, X } from "lucide-react";
+import { LayoutDashboard, Package, Users, Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/lib/AuthContext";
 
 const navItems = [
   { name: "Dashboard", icon: LayoutDashboard, page: "Dashboard" },
@@ -13,6 +14,7 @@ const navItems = [
 
 export default function Layout({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-slate-50/50">
@@ -50,6 +52,17 @@ export default function Layout({ children, currentPageName }) {
               );
             })}
           </nav>
+
+          {/* Minimal Sign Out */}
+          <div className="px-3 pt-2">
+            <button
+              onClick={signOut}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all duration-200 w-full"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Sign out
+            </button>
+          </div>
         </div>
       </aside>
 
@@ -93,8 +106,8 @@ export default function Layout({ children, currentPageName }) {
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className="lg:hidden fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-xl"
             >
-              <div className="pt-20 px-3">
-                <nav className="space-y-1">
+              <div className="pt-20 px-3 flex flex-col h-full pb-6">
+                <nav className="space-y-1 flex-1">
                   {navItems.map((item) => {
                     const isActive = currentPageName === item.page;
                     return (
@@ -115,6 +128,13 @@ export default function Layout({ children, currentPageName }) {
                     );
                   })}
                 </nav>
+                <button
+                  onClick={signOut}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all duration-200 w-full"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Sign out
+                </button>
               </div>
             </motion.div>
           </>

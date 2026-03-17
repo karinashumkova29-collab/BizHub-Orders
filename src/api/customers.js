@@ -1,28 +1,50 @@
-let customers = [];
+import { createClient } from "@supabase/supabase-js";
 
-export default function handler(req, res) {
-  if (req.method === "GET") {
-    return res.status(200).json(customers);
-  }
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
-  if (req.method === "POST") {
-    const { name, email } = req.body;
+export const Customer = {
+  list: async () => {
+    const { data, error } = await supabase.from("customers").select("*").order("created_date", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+  create: async (body) => {
+    const { data, error } = await supabase.from("customers").insert([body]).select().single();
+    if (error) throw new Error(error.message);
+    return data;
+  },
+  update: async (id, body) => {
+    const { data, error } = await supabase.from("customers").update(body).eq("id", id).select().single();
+    if (error) throw new Error(error.message);
+    return data;
+  },
+  delete: async (id) => {
+    const { error } = await supabase.from("customers").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+  },
+};
 
-    if (!name || !email) {
-      return res.status(400).json({ message: "Name and email are required" });
-    }
-
-    const newCustomer = {
-      id: Date.now().toString(),
-      name,
-      email,
-      createdAt: new Date().toISOString(),
-    };
-
-    customers.push(newCustomer);
-
-    return res.status(200).json(newCustomer);
-  }
-
-  res.status(405).json({ message: "Method not allowed" });
-}
+export const Order = {
+  list: async () => {
+    const { data, error } = await supabase.from("orders").select("*").order("created_date", { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  },
+  create: async (body) => {
+    const { data, error } = await supabase.from("orders").insert([body]).select().single();
+    if (error) throw new Error(error.message);
+    return data;
+  },
+  update: async (id, body) => {
+    const { data, error } = await supabase.from("orders").update(body).eq("id", id).select().single();
+    if (error) throw new Error(error.message);
+    return data;
+  },
+  delete: async (id) => {
+    const { error } = await supabase.from("orders").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+  },
+};

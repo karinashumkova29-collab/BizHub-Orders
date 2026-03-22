@@ -57,20 +57,22 @@ export default function NewOrder() {
   const total = subtotal + (formData.tax || 0) + (formData.shipping_cost || 0);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const orderNumber = `ORD-${Date.now()}`;
+  const orderNumber = `ORD-${Date.now()}`;
 
-    const orderData = {
-      ...formData,
-      order_number: orderNumber,
-      subtotal,
-      total_amount: total,
-      items: formData.items || [],
-    };
-
-    createMutation.mutate(orderData);
+  const orderData = {
+    ...formData,
+    order_number: orderNumber,
+    subtotal,
+    total_amount: total,
+    items: formData.items || [],
+    due_date: formData.due_date || null,        // empty string → null
+    customer_id: formData.customer_id || null,  // empty string → null
   };
+
+  createMutation.mutate(orderData);
+};
 
   const handleCustomerChange = (customerId, customerName) => {
     const customer = customers.find((c) => c.id === customerId);
